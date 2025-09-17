@@ -8,16 +8,13 @@ const nowPlaying = document.getElementById('nowPlaying');
 let isPlaying = false;
 let currentStreamIndex = 0;
 
-// Nuevo reproductor externo (embed)
-const EXTERNAL_EMBED_URL = 'https://a7.asurahosting.com/public/conexi%C3%B3n_celestial_est%C3%A9reo_/embed?theme=light&autoplay=true';
-
 // URLs posibles del stream de Azura Cast
 const streamUrls = [
-    'https://a12.asurahosting.com/listen/puerto_celestial/radio.mp3',
-    'https://a12.asurahosting.com/listen/puerto_celestial/stream',
-    'https://a12.asurahosting.com/public/puerto_celestial/stream',
-    'https://a12.asurahosting.com/radio/8000/radio.mp3',
-    'https://a12.asurahosting.com:8000/stream'
+    'https://a7.asurahosting.com/public/conexi%C3%B3n_celestial_est%C3%A9reo_/stream',
+    'https://a7.asurahosting.com/public/conexi%C3%B3n_celestial_est%C3%A9reo_/radio.mp3',
+    'https://a7.asurahosting.com/listen/conexi%C3%B3n_celestial_est%C3%A9reo_/stream',
+    'https://a7.asurahosting.com:8000/stream',
+    'https://a7.asurahosting.com/radio/8000/radio.mp3'
 ];
 
 // Configurar volumen inicial
@@ -25,29 +22,6 @@ radioStream.volume = 0.7;
 
 playBtn.addEventListener('click', togglePlay);
 volumeSlider.addEventListener('input', adjustVolume);
-
-// Crea o asegura un iframe oculto para reproducir el embed externo
-function ensureExternalPlayer() {
-    let iframe = document.getElementById('externalEmbedPlayer');
-    if (!iframe) {
-        iframe = document.createElement('iframe');
-        iframe.id = 'externalEmbedPlayer';
-        iframe.style.width = '0';
-        iframe.style.height = '0';
-        iframe.style.border = '0';
-        iframe.style.position = 'absolute';
-        iframe.style.left = '-9999px';
-        iframe.setAttribute('allow', 'autoplay');
-        document.body.appendChild(iframe);
-    }
-    iframe.src = EXTERNAL_EMBED_URL; // forzar (re)carga y autoplay
-    return iframe;
-}
-
-function removeExternalPlayer() {
-    const iframe = document.getElementById('externalEmbedPlayer');
-    if (iframe) iframe.remove();
-}
 
 function tryNextStream() {
     if (currentStreamIndex < streamUrls.length) {
@@ -62,7 +36,7 @@ function tryNextStream() {
             playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
             playBtn.classList.add('playing');
             status.textContent = 'Reproduciendo en vivo';
-            nowPlaying.textContent = 'Puerto Celestial - En vivo';
+            nowPlaying.textContent = 'Conexión Celestial Estéreo - En vivo';
             isPlaying = true;
             console.log('Stream funcionando:', url);
         }).catch(error => {
@@ -81,8 +55,7 @@ function tryNextStream() {
 
 function togglePlay() {
     if (isPlaying) {
-        // Detener reproducción del embed externo
-        removeExternalPlayer();
+        radioStream.pause();
         playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
         playBtn.classList.remove('playing');
         status.textContent = 'Detenido';
@@ -92,22 +65,20 @@ function togglePlay() {
         // Detener animación periódica cuando se pausa
         detenerAnimacionPeriodica();
     } else {
-        try {
-            ensureExternalPlayer();
-            playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-            playBtn.classList.add('playing');
-            status.textContent = 'Reproduciendo en vivo';
-            nowPlaying.textContent = 'Conexión Celestial Estéreo - En vivo';
-            isPlaying = true;
+        currentStreamIndex = 0;
+        tryNextStream().then(() => {
+            // Iniciar animación periódica cuando se reproduce exitosamente
             iniciarAnimacionPeriodica();
-        } catch (error) {
-            console.error('Error al reproducir (embed):', error);
-            status.textContent = 'Error: No se pudo iniciar el reproductor';
+        }).catch(error => {
+            console.error('Error al reproducir:', error);
+            status.textContent = 'Error: No se pudo conectar a ningún stream';
             nowPlaying.textContent = 'Verifica tu conexión a internet';
             playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
             playBtn.classList.remove('playing');
+            
+            // Asegurar que no se inicie la animación si hay error
             detenerAnimacionPeriodica();
-        }
+        });
     }
 }
 
@@ -139,10 +110,10 @@ radioStream.addEventListener('error', () => {
 function updateNowPlaying() {
     if (isPlaying) {
         const songs = [
-            'Puerto Celestial - Música en vivo',
+            'Conexión Celestial Estéreo - Música en vivo',
             'Transmisión en directo',
             'Tu estación favorita',
-            'Conectado a Puerto Celestial'
+            'Conectado a Conexión Celestial'
         ];
         const randomSong = songs[Math.floor(Math.random() * songs.length)];
         nowPlaying.textContent = randomSong;
@@ -154,8 +125,8 @@ setInterval(updateNowPlaying, 30000);
 
 // Función para abrir WhatsApp y pedir canción
 function abrirWhatsAppPedirCancion() {
-    const numeroWhatsApp = '573028461162'; // Número sin el +
-    const mensaje = 'Hola Conexión Celestial! Me gustaría pedir una canción para la radio.';
+    const numeroWhatsApp = '573148348401 '; // Número sin el +
+    const mensaje = 'Hola Conexión Celestial! 🎵 Me gustaría pedir una canción para la radio.';
     const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
     
     // Abrir WhatsApp en una nueva ventana
@@ -302,7 +273,7 @@ async function fetchYouTubePodcasts() {
                             description: item.description || 'Contenido cristiano de Puerto Celestial',
                             thumbnail: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
                             publishedAt: new Date(item.pubDate).toLocaleDateString('es-ES'),
-                            channelTitle: 'Puerto Celestial'
+                            channelTitle: 'Conexión Celestial'
                         };
                     });
                 }
@@ -326,11 +297,11 @@ function getStaticPlaylistData() {
     return [
         {
             id: 'dmUen41230o',
-            title: 'Video de la Playlist - Puerto Celestial',
-            description: 'Contenido cristiano de la playlist de Puerto Celestial Radio.',
+            title: 'Video de la Playlist - Conexión Celestial',
+            description: 'Contenido cristiano de la playlist de Conexión Celestial Estéreo.',
             thumbnail: 'https://img.youtube.com/vi/dmUen41230o/maxresdefault.jpg',
             publishedAt: new Date().toLocaleDateString('es-ES'),
-            channelTitle: 'Puerto Celestial'
+            channelTitle: 'Conexión Celestial'
         }
     ];
 }
