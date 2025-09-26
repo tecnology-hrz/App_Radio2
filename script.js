@@ -125,7 +125,7 @@ setInterval(updateNowPlaying, 30000);
 
 // Función para abrir WhatsApp y pedir canción
 function abrirWhatsAppPedirCancion() {
-    const numeroWhatsApp = '573148348401'; // Número sin el +
+    const numeroWhatsApp = '573176705411'; // Número sin el +
     const mensaje = 'Hola Conexión Celestial! Me gustaría pedir una canción para la radio.';
     const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensaje)}`;
     
